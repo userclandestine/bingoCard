@@ -4,20 +4,22 @@
 
 .bingoHeader {
     position: absolute;
-    top: 27px;
+    top: 15px;
     width: 395px;
     color: white;
     background-color: red;
     border: 1px solid #222222;
     border-style: solid;
     text-align: center;
-    font-size: 5em;
+    font-size: 7.8em;
     font-weight: bold;
+    font-family:"Lucida Console";
+    vertical-align: top;
 }
 
 .container {
     position: absolute;
-	top: 120px;
+	top: 150px;
     background-color: #222222;
     border: 1px solid #222222;
     border-style: solid;
