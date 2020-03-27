@@ -112,9 +112,14 @@ function uncoverCell(btn) {
     var btnY = getYPos(btnID);
 	target_button = $('#button-' + btnX + '-' + btnY);
 	
+	console.log("uncoverCell:" + btnID + " " + btn.hasClass('uncovered'));
     if (!btn.hasClass('uncovered')) {
-        btn.fadeOut('slow');
+        btn.fadeTo('slow', 0.0001);
         btn.addClass('uncovered');
+    }
+    else {
+        btn.fadeTo('slow', 1.0);
+        btn.removeClass('uncovered');
     }
 }
 
