@@ -5,53 +5,38 @@ var CELL_HEIGHT = 75;
 var NUM_PER_COL = 15;
 var CELL_BORDER = 2;
 var CELL_OUTER_WIDTH = (CELL_WIDTH + CELL_BORDER*2);
-var bingoCard = [];
-var chosenNumbers = [];
-var timers = [];
+var CELL_OUTER_HEIGHT = (CELL_HEIGHT + CELL_BORDER*2);
+var BASE_Y_OFFSET = 150;
+
 
 $(document).ready(setup);
 
 function setup() {
-    $('.build').mousedown(gatherInput);
-	gatherInput();
+    //$('.build').mousedown(gatherInput);
+	$('.container').each(generateGame);
 }
 
-function gatherInput() {
-	generateGame();
-}
+function generateGame(index) {
+	$(this).empty();
+	$(this).width(CARD_WIDTH*(CELL_WIDTH + CELL_BORDER*2));
+	$(this).height(CARD_HEIGHT*(CELL_WIDTH + CELL_BORDER*2));
 
-function resetGame() {
-	timers = [];
-	bingoCard = [];
-	for (var i=0; i < timers.length; ++i) {
-		clearTimeout(timers[i]);
-	}
-}
-
-function generateGame() {
-	resetGame();
-	$('.container').empty();
-	$('.container').width(CARD_WIDTH*(CELL_WIDTH + CELL_BORDER*2));
-	$('.container').height(CARD_HEIGHT*(CELL_WIDTH + CELL_BORDER*2));
-
-    generateBingoCard();
-    setupBingoCard();
-    setupButtons();
+    var bingoCard = generateBingoCard();
+    setupBingoCard(index, bingoCard, $(this));
+    setupButtons(index, bingoCard, $(this));
 }
 
 function generateBingoCard() {
+    var bingoCard = [];
 	for (var x=0; x < CARD_WIDTH; ++x) {
-        bingoCard.push([]);
-        for (var y=0; y < CARD_HEIGHT; ++y) {
-            bingoCard[x].push("");
-        }
+        bingoCard.push(["","","","","",""]);
     }
 
     for (var x=0; x < CARD_WIDTH; ++x) {
+        var chosenNumbers = [];
         for (var y=0; y < CARD_HEIGHT; ++y) {
-        	var curValue = "FREE";
-        	if (x != 2 || y != 2)
-        	{
+        	var curValue = -1;
+        	if (x != 2 || y != 2) {
 	        	do
 	        	{
 		        	var randomOffset = Math.floor(Math.random() * NUM_PER_COL) + 1;
@@ -60,47 +45,63 @@ function generateBingoCard() {
 
 	        	chosenNumbers.push(curValue);
         	}
-
-            bingoCard[x][y] = curValue;
         }
+
+        chosenNumbers.sort(function(a, b){return a - b});
+        if (x == 2) {
+            //Inset 'FREE' into array index 2 if it's the middle column
+            chosenNumbers.splice(2, 0, "FREE");
+        }
+
+        bingoCard[x] = chosenNumbers;
     }
     
 	for (x=0; x < CARD_WIDTH; ++x) {
 		console.log(bingoCard[x]);
 	}
+
+    return bingoCard;
 }
 
-function setupBingoCard() {
-    var container = $('.container');
+function setupBingoCard(index, bingoCard, container) {
+    container.append("<div class='bingoHeader unselectable'>BINGO</div>");
+
     var all_cells = '';
-    
     processOnBingoCard(function (x, y) {
-        var cell = '<div id="cell-' + x + '-' + y + '" class="cell unselectable"';
-        cell += ' style="left: ' + (x*CELL_OUTER_WIDTH+1) + 'px; top: ' + (y*CELL_OUTER_WIDTH+1) + 'px;"><div style="height:'+ (y*CELL_OUTER_WIDTH+1) + ' line-height:'+ (y*CELL_OUTER_WIDTH+1) + '">' + bingoCard[x][y] + '</div></div>';
+        var xOffset = (x*CELL_OUTER_WIDTH);
+        var yOffset = (y*CELL_OUTER_HEIGHT) + BASE_Y_OFFSET;
+        var cell = '<div id="cell-' + index + '-' + x + '-' + y + '" class="cell unselectable"';
+        cell += ' style="left: ' + xOffset + 'px; top: ' + yOffset + 'px;">' + bingoCard[x][y] + '</div></div>';
         all_cells += cell;
     });
     container.append(all_cells);
 }
 
-function setupButtons() {
-    var container = $('.container');
+function setupButtons(index, bingoCard, container) {
     var all_buttons = '';
     processOnBingoCard(function (x, y) {
-            var button = '<div id="button-' + x + '-' + y + '" class="button unselectable"';
-            button += ' style="left: ' + (x*CELL_OUTER_WIDTH+1) + 'px; top: ' + (y*CELL_OUTER_WIDTH+1) + 'px;"><div>' + bingoCard[x][y] + '</div></div>';
+            var xOffset = (x*CELL_OUTER_WIDTH);
+            var yOffset = (y*CELL_OUTER_HEIGHT) + BASE_Y_OFFSET;
+            var button = '<div id="button-' + index + '-' + x + '-' + y + '" class="button unselectable"';
+            button += ' style="left: ' + xOffset + 'px; top: ' + yOffset + 'px;"><div>' + bingoCard[x][y] + '</div></div>';
             all_buttons += button;
     });
     container.append(all_buttons)
-    var buttons = $('[id*=button-]');
+    var buttons = $('[id*=button-' + index + ']');
     buttons.mousedown(handleMouse);
 }
 
+
+function getContainerIndex(id) {
+    return parseInt(id.split('-')[1]);
+}
+
 function getXPos(id) {
-	return parseInt(id.split('-')[1]);
+	return parseInt(id.split('-')[2]);
 }
 
 function getYPos(id) {
-	return parseInt(id.split('-')[2]);
+	return parseInt(id.split('-')[3]);
 }
 
 function uncoverCell(btn) {
